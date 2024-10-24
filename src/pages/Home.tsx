@@ -1,13 +1,15 @@
 import { Search } from "../components/Search"
 import { getMovies } from "../api/getMovies";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Movie } from "../types/movie";
 import { Link } from "react-router-dom";
 import { Loading } from "../components/Loading";
 
 export const Home = () => {
+  const observerTarget = useRef(null);
 
   const [movies, setMovies] = useState<Movie[]>([])
+  const [chunk, setChunk] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -16,22 +18,46 @@ export const Home = () => {
   }
 
   useEffect(() => {
-    const fetchApi = async () => {
-      setLoading(true)
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 400))
-        const { data } = await getMovies()
-        setMovies(data.results)
-        setLoading(false)
-      } catch (error: unknown) {
-        setLoading(false)
-        if (error instanceof Error) {
-          setError(error.message)
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          const fetchApi = async () => {
+            setLoading(true)
+            try {
+              await new Promise((resolve) => setTimeout(resolve, 400))
+              const { data } = await getMovies(chunk)
+              console.log(`# data :`, data)
+              setMovies([
+                ...movies,
+                ...data.results
+              ])
+              setChunk(data.page + 1)
+              setLoading(false)
+            } catch (error: unknown) {
+              setLoading(false)
+              if (error instanceof Error) {
+                setError(error.message)
+              }
+              console.error('Error:', error)
+            }
+          }
+          fetchApi();
         }
-        console.error('Error:', error)
-      }
+      },
+      { threshold: 1 }
+    );
+
+    const target = observerTarget.current;
+    if (target) {
+      observer.observe(target);
     }
-    fetchApi();
+
+    return () => {
+      if (target) {
+        observer.unobserve(target);
+      }
+    };
   }, []);
 
   return (
@@ -50,9 +76,13 @@ export const Home = () => {
         </div>
       ))}
 
+      {/* https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API */}
+      <div ref={observerTarget} />
+
       {error && <p>Error: {error}</p>}
 
       {loading && <Loading />}
+
     </>
   )
 }
