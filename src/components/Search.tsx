@@ -2,7 +2,35 @@ import React, { FormEvent, useState } from "react"
 import { getMoviesBySearch } from "../api/getMoviesBySearch"
 import { SearchQuery } from "../types/searchQuery"
 import { Movie } from "../types/movie"
+import styled from "styled-components"
 
+const Form = styled.form`
+  margin: 28px auto 0;
+  background-color: rgb(48, 48, 48);
+  padding: 20px;
+  border-radius: 20px;
+`
+
+const Inputs = styled.div`
+  display: flex;
+  max-width: 500px;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+`
+
+const Label = styled.label`
+  /* width: fit-content; */
+`
+const Input = styled.input`
+  /* width: fit-content; */
+`
+const Button = styled.button`
+  font-weight: bold;
+  height: 40px;
+  margin-top: 20px;
+  width: 200px;
+`
 type SearchProps = {
   onSearchResults: (results: Movie[]) => void
 }
@@ -42,22 +70,24 @@ export const Search: React.FC<SearchProps> = ({ onSearchResults }) => {
   }
 
   return (
-    <form onSubmit={(e) => handleSearch(e)}>
-      {inputFields.map((field) => (
-        <React.Fragment key={field.id}>
-          <label htmlFor={field.id}>{field.label}</label>
-          <input
-            placeholder={field.placeholder}
-            onChange={(e) => handleInputChange(e)}
-            id={field.id}
-            type={field.type}
-            checked={field.type === 'checkbox' ? field.value as boolean : undefined}
-            value={field.type === 'checkbox' ? undefined : field.value as string}
-          />
-        </React.Fragment>
-      ))}
-
-      <button type="submit">Search</button>
-    </form>
+    <Form onSubmit={(e) => handleSearch(e)}>
+      <Inputs>
+        {inputFields.map((field) => (
+          <div key={field.id}>
+            <Label htmlFor={field.id}>{field.label}</Label>
+            <br />
+            <Input
+              placeholder={field.placeholder}
+              onChange={(e) => handleInputChange(e)}
+              id={field.id}
+              type={field.type}
+              checked={field.type === 'checkbox' ? field.value as boolean : undefined}
+              value={field.type === 'checkbox' ? undefined : field.value as string}
+            />
+          </div>
+        ))}
+      </Inputs>
+      <Button type="submit">Search</Button>
+    </Form>
   )
 }
