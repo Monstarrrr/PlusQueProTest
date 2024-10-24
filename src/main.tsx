@@ -6,12 +6,10 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { Movie } from './pages/Movie.tsx';
-import { Error } from './pages/Error.tsx';
+import { Error } from './pages/PageError.tsx';
 import MainLayout from './MainLayout.tsx';
 import { Home } from './pages/Home.tsx';
-import { getMovies } from './api/getMovies.ts';
-import { getMovie } from './api/getMovie.ts';
-import { Loading } from './pages/Loading.tsx';
+import { Loading } from './components/Loading.tsx';
 
 const router = createBrowserRouter([
   {
@@ -22,12 +20,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Home />,
-        loader: async () => getMovies(),
       },
       {
         path: "/movie/:id",
         element: <Movie />,
-        loader: async ({ params }) => await getMovie(Number(params.id)),
       },
     ]
   },
